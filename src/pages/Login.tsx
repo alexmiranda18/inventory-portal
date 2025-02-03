@@ -12,11 +12,12 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Implement login logic here
+    // Implement login logic here with invite code validation
     setTimeout(() => setIsLoading(false), 1000);
   };
 
@@ -62,6 +63,18 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="invite">Código de Convite</Label>
+                <Input
+                  id="invite"
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  placeholder="Digite seu código de convite"
                   required
                   className="mt-1"
                 />
