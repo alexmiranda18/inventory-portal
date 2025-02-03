@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { FcGoogle } from 'react-icons/fc';
-import { Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FcGoogle } from "react-icons/fc";
+import { Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Navbar } from "@/components/Navbar";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
-      
+
       <div className="flex min-h-screen items-center justify-center px-4 py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -36,10 +36,18 @@ const Login = () => {
               Bem-vindo de volta
             </h2>
             <p className="mt-2 text-gray-600">
-              Entre para acessar sua conta ou{" "}
-              <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
-                registre-se aqui
-              </Link>
+              Entre para acessar sua conta ou
+              <br /> {/* Quebra de linha */}
+              <span className="block text-center">
+                {" "}
+                {/* Centraliza o texto */}
+                <Link
+                  to="/register"
+                  className="text-primary-600 hover:text-primary-500 font-medium"
+                >
+                  registre-se aqui
+                </Link>
+              </span>
             </p>
           </div>
 
@@ -88,7 +96,7 @@ const Login = () => {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              {isLoading ? 'Entrando...' : 'Entrar'}
+              {isLoading ? "Entrando..." : "Entrar"}
             </Button>
 
             <div className="relative">
