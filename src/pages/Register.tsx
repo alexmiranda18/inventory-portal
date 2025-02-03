@@ -6,15 +6,21 @@ import { FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const Login = () => {
+const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      // Implement password match validation
+      return;
+    }
     setIsLoading(true);
-    // Implement login logic here
+    // Implement registration logic here with invite code
     setTimeout(() => setIsLoading(false), 1000);
   };
 
@@ -28,12 +34,12 @@ const Login = () => {
       >
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
-            Login
+            Criar Conta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Ou{' '}
-            <Link to="/register" className="font-medium text-primary hover:text-primary/90">
-              registre-se aqui
+            Já tem uma conta?{' '}
+            <Link to="/login" className="font-medium text-primary hover:text-primary/90">
+              Faça login
             </Link>
           </p>
         </div>
@@ -63,15 +69,30 @@ const Login = () => {
                 className="mt-1"
               />
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Link
-              to="/forgot-password"
-              className="text-sm font-medium text-primary hover:text-primary/90"
-            >
-              Esqueceu sua senha?
-            </Link>
+            <div>
+              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="inviteCode">Código de Convite</Label>
+              <Input
+                id="inviteCode"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                placeholder="Digite seu código de convite"
+                required
+                className="mt-1"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -80,17 +101,17 @@ const Login = () => {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? "Criando conta..." : "Criar conta"}
             </Button>
 
             <Button
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => {/* Implement Google login */}}
+              onClick={() => {/* Implement Google registration */}}
             >
               <FaGoogle className="mr-2" />
-              Entrar com Google
+              Registrar com Google
             </Button>
           </div>
         </form>
@@ -99,4 +120,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
