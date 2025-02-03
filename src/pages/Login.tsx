@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FaGoogle } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { FcGoogle } from 'react-icons/fc';
+import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Navbar } from '@/components/Navbar';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,82 +21,98 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg"
-      >
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            Login
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Ou{' '}
-            <Link to="/register" className="font-medium text-primary hover:text-primary/90">
-              registre-se aqui
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="mt-1"
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Navbar />
+      
+      <div className="flex min-h-screen items-center justify-center px-4 py-32">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg"
+        >
+          <div className="text-center">
+            <h2 className="text-3xl font-heading font-bold text-gray-900">
+              Bem-vindo de volta
+            </h2>
+            <p className="mt-2 text-gray-600">
+              Entre para acessar sua conta
+            </p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <Link
-              to="/forgot-password"
-              className="text-sm font-medium text-primary hover:text-primary/90"
-            >
-              Esqueceu sua senha?
-            </Link>
-          </div>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="mt-1"
+                />
+              </div>
+            </div>
 
-          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary-600 hover:text-primary-500"
+              >
+                Esqueceu sua senha?
+              </Link>
+            </div>
+
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-primary-600 hover:bg-primary-700"
               disabled={isLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-gray-500">
+                  Ou continue com
+                </span>
+              </div>
+            </div>
 
             <Button
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => {/* Implement Google login */}}
+              onClick={() => {
+                // Implement Google login
+              }}
             >
-              <FaGoogle className="mr-2" />
-              Entrar com Google
+              <FcGoogle className="mr-2 h-5 w-5" />
+              Google
             </Button>
-          </div>
-        </form>
-      </motion.div>
+          </form>
+        </motion.div>
+      </div>
     </div>
   );
 };
