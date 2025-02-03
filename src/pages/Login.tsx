@@ -36,7 +36,10 @@ const Login = () => {
               Bem-vindo de volta
             </h2>
             <p className="mt-2 text-gray-600">
-              Entre para acessar sua conta
+              Entre para acessar sua conta ou{" "}
+              <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
+                registre-se aqui
+              </Link>
             </p>
           </div>
 
