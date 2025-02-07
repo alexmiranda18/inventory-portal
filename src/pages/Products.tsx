@@ -19,7 +19,7 @@ export default function Products() {
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const response = await fetch("/api/products", {
+      const response = await fetch("http://localhost:3000/api/products", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

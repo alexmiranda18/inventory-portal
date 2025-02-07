@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -12,7 +11,6 @@ import {
   ArrowDown,
   ArrowUp,
   Package,
-  PackageOpen,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -28,7 +26,7 @@ export default function Dashboard() {
   const { data: stockStats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["stock-stats"],
     queryFn: async () => {
-      const response = await fetch("/api/stock/stats", {
+      const response = await fetch("http://localhost:3000/api/stock/movements", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -43,7 +41,7 @@ export default function Dashboard() {
   const { data: lowStock, isLoading: isLoadingLowStock } = useQuery({
     queryKey: ["low-stock"],
     queryFn: async () => {
-      const response = await fetch("/api/stock/low", {
+      const response = await fetch("http://localhost:3000/api/products", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -51,14 +49,15 @@ export default function Dashboard() {
       if (!response.ok) {
         throw new Error("Failed to fetch low stock items");
       }
-      return response.json();
+      const products = await response.json();
+      return products.filter((product: any) => product.stock <= product.minStock);
     },
   });
 
   const { data: recentMovements, isLoading: isLoadingMovements } = useQuery({
     queryKey: ["recent-movements"],
     queryFn: async () => {
-      const response = await fetch("/api/stock/recent-movements", {
+      const response = await fetch("http://localhost:3000/api/stock/movements", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -19,7 +19,7 @@ export default function Categories() {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const response = await fetch("/api/categories", {
+      const response = await fetch("http://localhost:3000/api/categories", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

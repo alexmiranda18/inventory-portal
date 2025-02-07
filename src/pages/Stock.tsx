@@ -19,7 +19,7 @@ export default function Stock() {
   const { data: stockMovements, isLoading } = useQuery({
     queryKey: ["stock-movements"],
     queryFn: async () => {
-      const response = await fetch("/api/stock-movements", {
+      const response = await fetch("http://localhost:3000/api/stock/movements", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
