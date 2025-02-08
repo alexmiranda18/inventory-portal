@@ -113,7 +113,6 @@ export default function Products() {
     },
   });
 
-  // Mutation para atualizar produto usando FormData
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, formData }) => {
       const response = await fetch(
