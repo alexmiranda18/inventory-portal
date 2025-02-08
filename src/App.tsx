@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import Products from "./pages/Products";
 import Stock from "./pages/Stock";
 import Dashboard from "./pages/Dashboard";
 import { DashboardLayout } from "./components/DashboardLayout";
+import GoogleCallback from './pages/GoogleCallback';
 
 const queryClient = new QueryClient();
 
@@ -35,6 +35,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

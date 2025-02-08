@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -20,26 +19,43 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     if (password !== confirmPassword) {
       toast.error("As senhas não coincidem");
       return;
     }
-
+  
     if (password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres");
       return;
     }
-
+  
     setIsLoading(true);
-    
-    // Aqui implementaremos a lógica de redefinição de senha posteriormente
-    setTimeout(() => {
+  
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password }),
+      });
+  
+      if (response.ok) {
+        toast.success("Senha redefinida com sucesso!");
+        navigate("/login");
+      } else {
+        const data = await response.json();
+        toast.error(data.message || "Erro ao redefinir senha");
+      }
+    } catch (error) {
+      toast.error("Erro ao redefinir senha");
+    } finally {
       setIsLoading(false);
-      toast.success("Senha redefinida com sucesso!");
-      navigate("/login");
-    }, 1000);
+    }
   };
+  
+  
 
   if (!token) {
     return (
@@ -80,9 +96,7 @@ const ResetPassword = () => {
             <h2 className="text-3xl font-heading font-bold text-gray-900">
               Redefinir senha
             </h2>
-            <p className="mt-2 text-gray-600">
-              Digite sua nova senha abaixo
-            </p>
+            <p className="mt-2 text-gray-600">Digite sua nova senha abaixo</p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -99,7 +113,7 @@ const ResetPassword = () => {
                   className="mt-1"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="confirmPassword">Confirme a nova senha</Label>
                 <Input

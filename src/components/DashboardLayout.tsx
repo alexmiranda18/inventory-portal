@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -13,16 +12,41 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import { useToast } from "./ui/use-toast"; // Importe o useToast
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className, ...props }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast(); // Inicialize o useToast
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      // Chama a rota de logout no backend (se necessário)
+      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      localStorage.removeItem("token"); // Remove o token do localStorage
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+        variant: "default",
+      });
+      navigate("/login"); // Redireciona para a página de login
+    } catch (error) {
+      toast({
+        title: "Erro no logout",
+        description: "Ocorreu um erro ao tentar fazer logout.",
+        variant: "destructive",
+      });
+    }
   };
 
   const links = [
@@ -49,10 +73,10 @@ export function Sidebar({ className, ...props }: SidebarProps) {
   ];
 
   return (
-    <div className={cn("pb-12", className)} {...props}>
+    <div className={cn("pb-12 bg-sidebar-background", className)} {...props}>
       <div className="space-y-4 py-4">
         <div className="px-4 py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
+          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight text-primary-800">
             StockPro
           </h2>
           <div className="space-y-1">
@@ -61,9 +85,9 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 text-gray-700 transition-colors duration-200",
                   location.pathname === link.href
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-primary-600 text-gray-800"
                     : "transparent"
                 )}
               >
@@ -77,7 +101,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
       <div className="px-4">
         <Button
           variant="ghost"
-          className="w-full justify-start"
+          className="w-full justify-start text-gray-800 hover:bg-primary-600 hover:text-gray-800"
           onClick={handleLogout}
         >
           <LogOut className="mr-2 h-4 w-4" />
@@ -92,10 +116,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Mobile sidebar toggle */}
       <button
-        className="fixed left-4 top-4 z-50 block md:hidden"
+        className="fixed left-4 top-4 z-50 block md:hidden p-2 rounded-lg bg-primary-600 text-black hover:bg-primary-700 transition-colors duration-200"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         {sidebarOpen ? (
@@ -119,7 +143,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <div className="flex-1 overflow-auto">
-        <main className="p-6">{children}</main>
+        <main className="p-6 bg-white rounded-lg shadow-sm m-4">
+          {children}
+        </main>
       </div>
     </div>
   );

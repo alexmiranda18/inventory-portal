@@ -6,12 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  AlertTriangle,
-  ArrowDown,
-  ArrowUp,
-  Package,
-} from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Table,
@@ -23,55 +18,103 @@ import {
 } from "@/components/ui/table";
 
 export default function Dashboard() {
-  const { data: stockStats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ["stock-stats"],
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ["products"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:3000/api/stock/movements", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/products`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       if (!response.ok) {
-        throw new Error("Failed to fetch stock statistics");
+        throw new Error("Failed to fetch products");
       }
       return response.json();
     },
   });
 
-  const { data: lowStock, isLoading: isLoadingLowStock } = useQuery({
-    queryKey: ["low-stock"],
+  const { data: stockMovements, isLoading: isLoadingMovements } = useQuery({
+    queryKey: ["stock-movements"],
     queryFn: async () => {
-      const response = await fetch("http://localhost:3000/api/products", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch low stock items");
-      }
-      const products = await response.json();
-      return products.filter((product: any) => product.stock <= product.minStock);
-    },
-  });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/stock/movements`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-  const { data: recentMovements, isLoading: isLoadingMovements } = useQuery({
-    queryKey: ["recent-movements"],
-    queryFn: async () => {
-      const response = await fetch("http://localhost:3000/api/stock/movements", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
       if (!response.ok) {
-        throw new Error("Failed to fetch recent movements");
+        throw new Error("Failed to fetch stock movements");
       }
       return response.json();
     },
   });
 
-  if (isLoadingStats || isLoadingLowStock || isLoadingMovements) {
+  if (isLoadingProducts || isLoadingMovements) {
     return <div>Carregando...</div>;
   }
+
+  // Calcula o estoque atual de cada produto com base nas movimentações
+  const productsWithStock = products?.map((product) => {
+    const productMovements = stockMovements?.filter(
+      (movement) => movement.product_id === product.id
+    );
+
+    // Encontra a movimentação inicial (se existir)
+    const initialMovement = productMovements?.find(
+      (movement) => movement.notes === "Initial stock"
+    );
+
+    // Usa a quantidade da movimentação inicial ou 0 se não houver
+    const initialStock = initialMovement ? initialMovement.quantity : 0;
+
+    const currentStock = productMovements?.reduce((total, movement) => {
+      if (movement.notes === "Initial stock") return total; // Ignora movimentações iniciais no cálculo normal
+      return (
+        total +
+        (movement.type === "IN" ? movement.quantity : -movement.quantity)
+      );
+    }, initialStock); // Usa o estoque inicial como base
+
+    return {
+      ...product,
+      currentStock: currentStock || 0,
+    };
+  });
+
+  // Calcula o total de produtos
+  const totalProducts = productsWithStock?.length || 0;
+
+  // Filtra produtos com baixo estoque
+  const lowStockProducts = productsWithStock?.filter(
+    (product) => product.currentStock <= product.min_stock // min_stock do banco de dados
+  );
+
+  // Total de produtos com baixo estoque
+  const lowStockCount = lowStockProducts?.length || 0;
+
+  // Filtra as movimentações de hoje
+  const today = new Date().toISOString().split("T")[0]; // Formato YYYY-MM-DD
+  const todayMovements = stockMovements?.filter(
+    (movement) => movement.created_at.split("T")[0] === today
+  );
+
+  // Calcula o total de entradas e saídas hoje
+  let todayIncoming = 0;
+  let todayOutgoing = 0;
+
+  todayMovements?.forEach((movement) => {
+    if (movement.type === "IN") {
+      todayIncoming += movement.quantity;
+    } else if (movement.type === "OUT") {
+      todayOutgoing += movement.quantity;
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -86,13 +129,15 @@ export default function Dashboard() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Produtos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Produtos
+              </CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stockStats?.totalProducts}</div>
+              <div className="text-2xl font-bold">{totalProducts}</div>
               <p className="text-xs text-muted-foreground">
-                Em {stockStats?.totalCategories} categorias
+                Total de produtos cadastrados
               </p>
             </CardContent>
           </Card>
@@ -112,7 +157,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-500">
-                {stockStats?.lowStockCount}
+                {lowStockCount}
               </div>
               <p className="text-xs text-muted-foreground">
                 Abaixo do estoque mínimo
@@ -135,10 +180,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-500">
-                {stockStats?.todayIncoming}
+                {todayIncoming}
               </div>
               <p className="text-xs text-muted-foreground">
-                Total de {stockStats?.todayIncomingValue} R$
+                Total de produtos que entraram hoje
               </p>
             </CardContent>
           </Card>
@@ -151,26 +196,64 @@ export default function Dashboard() {
         >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saídas (Hoje)</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Saídas (Hoje)
+              </CardTitle>
               <ArrowDown className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-500">
-                {stockStats?.todayOutgoing}
+                {todayOutgoing}
               </div>
               <p className="text-xs text-muted-foreground">
-                Total de {stockStats?.todayOutgoingValue} R$
+                Total de produtos que saíram hoje
               </p>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Low Stock Warning */}
+      {/* Tabela: Total de Produtos */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Total de Produtos</CardTitle>
+            <CardDescription>
+              Lista de todos os produtos com estoque atual
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="max-h-96 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Estoque Atual</TableHead>
+                  <TableHead>Estoque Mínimo</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {productsWithStock?.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.currentStock}</TableCell>
+                    <TableCell>{product.min_stock}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Tabela: Produtos com Baixo Estoque */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
       >
         <Card>
           <CardHeader>
@@ -179,7 +262,7 @@ export default function Dashboard() {
               Produtos que precisam de reposição imediata
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -190,11 +273,11 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lowStock?.map((item: any) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.currentStock}</TableCell>
-                    <TableCell>{item.minStock}</TableCell>
+                {lowStockProducts?.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.currentStock}</TableCell>
+                    <TableCell>{product.minStock}</TableCell>
                     <TableCell>
                       <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
                         Baixo Estoque
@@ -208,11 +291,11 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* Recent Movements */}
+      {/* Tabela: Últimas Movimentações */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.7 }}
       >
         <Card>
           <CardHeader>
@@ -221,7 +304,7 @@ export default function Dashboard() {
               Movimentações de estoque mais recentes
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -232,12 +315,18 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentMovements?.map((movement: any) => (
+                {stockMovements?.map((movement) => (
                   <TableRow key={movement.id}>
                     <TableCell>
-                      {new Date(movement.date).toLocaleDateString("pt-BR")}
+                      {new Date(movement.created_at).toLocaleDateString(
+                        "pt-BR"
+                      )}
                     </TableCell>
-                    <TableCell>{movement.product.name}</TableCell>
+                    <TableCell>
+                      {movement.product
+                        ? movement.product.name
+                        : "Produto não encontrado"}
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-semibold ${
